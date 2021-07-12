@@ -26,14 +26,14 @@ class RectRoom:
         """Returns inner area of room as 2D array"""
         return slice(self.x1 + 1, self.x2), slice(self.y1, self.y2)
 
-def intersect(self, other: RectRoom) -> bool:
-    """True if room overlaps with another room"""
-    return (
-        self.x1 <= other.x2
-        and self.x2 >= other.x1
-        and self.y1 <= other.y2
-        and self.y2 >= other.y1
-    )
+    def intersect(self, other: RectRoom) -> bool:
+        """True if room overlaps with another room"""
+        return (
+            self.x1 <= other.x2
+            and self.x2 >= other.x1
+            and self.y1 <= other.y2
+            and self.y2 >= other.y1
+        )
 
 def tunnel_between(
     start: Tuple[int, int], end: Tuple[int, int]
@@ -51,15 +51,32 @@ def tunnel_between(
     for x, y in tcod.los.bresenham((corner_x, corner_y), (x2, y2)).tolist():
         yield x, y
 
-def gen_dungeon(map_width, map_height) -> GameMap:
+def gen_dungeon(
+    max_no_rooms: int, room_min_size: int, room_max_size: int, map_width: int, map_height: int, player: Entity
+) -> GameMap:
     dungeon = GameMap(map_width, map_height)
+    rooms: List[RectRoom] = []
 
-    rm_1 = RectRoom(x=20, y=15, width=10, height=15)
-    rm_2 = RectRoom(x=35, y=15, width=10, height=15)
-    dungeon.tiles[rm_1.inner] = tile_types.floor
-    dungeon.tiles[rm_2.inner] = tile_types.floor
+    for r in range(max_no_rooms):
+        room_width = random.randint(room_min_size, room_max_size)
+        room_height = random.randint(room_min_size, room_max_size)
 
-    for x, y in tunnel_between(rm_2.center, rm_1.center):
-        dungeon.tiles[x, y] = tile_types.floor
+        x = random.randint(0, dungeon.width - room_width - 1)
+        y = random.randint(0, dungeon.height - room_height - 1)
+
+        new_room = RectRoom(x, y, room_width, room_height)
+
+        if any(new_room.intersect(other_room) for other_room in rooms):
+            continue
+
+        dungeon.tiles[new_room.inner] = tile_types.floor
+
+        if len(rooms) == 0:
+            player.x, player.y = new_room.center
+        else:
+            for x, y in tunnel_between(rooms[-1].center, new_room.center):
+                dungeon.tiles[x, y] = tile_types.floor
+
+        rooms.append(new_room)
 
     return dungeon
