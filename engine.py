@@ -1,4 +1,4 @@
-from typing import Set, Iterable, Any
+from typing import Iterable, Any
 from numpy import e
 
 from tcod.context import Context
@@ -10,8 +10,7 @@ from game_map import GameMap
 from input_handlers import EventHandler
 
 class Engine:
-    def __init__(self, entities: Set[Entity], event_handler: EventHandler, game_map: GameMap, player: Entity):
-        self.entities = entities
+    def __init__(self, event_handler: EventHandler, game_map: GameMap, player: Entity):
         self.event_handler = event_handler
         self.game_map = game_map
         self.player = player
@@ -37,10 +36,6 @@ class Engine:
     
     def render(self, console: Console, context: Context) -> None:
         self.game_map.render(console)
-
-        for en in self.entities:
-            if self.game_map.visible[en.x, en.y]:
-                console.print(en.x, en.y, en.char, fg=en.color)
 
         context.present(console)
         console.clear()
