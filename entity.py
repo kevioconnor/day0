@@ -2,9 +2,11 @@ from __future__ import annotations
 
 import copy
 
-from typing import Optional, Tuple, TypeVar, TYPE_CHECKING
+from typing import Optional, Tuple, Type, TypeVar, TYPE_CHECKING
 
 if TYPE_CHECKING:
+    from components.ai import BaseAI
+    from components.fighter import Fighter
     from game_map import GameMap
 
 T = TypeVar("T", bound="Entity")
@@ -50,3 +52,4 @@ class Entity:
         # Move entity by amount
         self.x += dx
         self.y += dy
+
