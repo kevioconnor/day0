@@ -1,10 +1,11 @@
 from __future__ import annotations
-from typing import Iterable, Optional, TYPE_CHECKING 
+from typing import Iterable, Iterator, Optional, TYPE_CHECKING
 
 import numpy as np
 from numpy.lib.shape_base import tile
 from tcod.console import Console
 
+from entity import Actor
 import tile_types
 
 if TYPE_CHECKING:
@@ -20,11 +21,27 @@ class GameMap:
         self.visible = np.full((width, height), fill_value=False, order="F")
         self.explored = np.full((width, height), fill_value=False, order="F") 
 
+    @property
+    def actors(self) -> Iterator[Actor]:
+        """Iterate over this maps living actors."""
+        yield from (
+            entity
+            for entity in self.entities
+            if isinstance(entity, Actor) and entity.is_alive
+        )
+
     def get_blocking_entity(self, loc_x: int, loc_y: int) -> Optional[Entity]:
         for en in self.entities:
             if en.blocks_movement and en.x == loc_x and en.y == loc_y:
                 return en
             
+        return None
+
+    def get_actor_at_location(self, x: int, y: int) -> Optional[Actor]:
+        for actor in self.actors:
+            if actor.x == x and actor.y == y:
+                return actor
+
         return None
     
     def in_bounds(self, x: int, y: int) -> bool:
@@ -36,7 +53,9 @@ class GameMap:
             choicelist=[self.tiles["light"], self.tiles["dark"]],
             default=tile_types.SHROUD,
         )
+
+        entities_sorted = sorted(self.entities, key=lambda x: x.render_order.value)
         
-        for en in self.entities:
+        for en in entities_sorted:
             if self.visible[en.x, en.y]:
                 console.print(en.x, en.y, en.char, fg=en.color)
