@@ -51,6 +51,9 @@ class EventHandler(tcod.event.EventDispatch[Action]):
     def handle_events(self) -> None:
         raise NotImplementedError()
     
+    def ev_quit(self, event: tcod.event.Quit) -> Optional[Action]:
+        raise SystemExit()
+    
 class MainGameEventHandler(EventHandler):
     def handle_events(self) -> None:
         for event in tcod.event.wait():

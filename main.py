@@ -1,5 +1,6 @@
 import copy
 import tcod
+import color
 
 from engine import Engine
 import entity_factories
@@ -10,7 +11,7 @@ def main()-> None:
     screen_height = 50
 
     map_width = 80
-    map_height = 45
+    map_height = 40
 
     room_max_size = 10
     room_min_size = 6
@@ -31,7 +32,9 @@ def main()-> None:
     )
 
     engine.update_fov()
-    
+    engine.message_log.add_message(
+        "You are currently in Caveman Cave.", color.white
+    )
 
     with tcod.context.new_terminal(
         screen_width, screen_height, tileset=tileset, title="Day0", vsync=True
