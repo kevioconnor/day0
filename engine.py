@@ -6,6 +6,7 @@ from numpy import e
 from tcod.console import Console
 from tcod.map import compute_fov
 
+import exceptions
 from input_handlers import MainGameEventHandler
 from message_log import MessageLog
 from render_functions import render_bar, render_name_at_location
@@ -27,7 +28,10 @@ class Engine:
     def handle_enemy_turns(self) -> None:
         for entity in set(self.game_map.actors) - {self.player}:
             if entity.ai:
-                entity.ai.perform()
+                try:
+                    entity.ai.perform()
+                except exceptions.Impossible:
+                    pass
         
     def update_fov(self) -> None:
         self.game_map.visible[:] = compute_fov(

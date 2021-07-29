@@ -1,10 +1,11 @@
 from __future__ import annotations
 from typing import Optional, Tuple, TYPE_CHECKING
 import color
+import exceptions
 
 if TYPE_CHECKING:
     from engine import Engine
-    from entity import Actor, Entity
+    from entity import Actor, Entity, Item
 
 class Action:
     def __init__(self, entity: Actor) -> None:
@@ -17,7 +18,22 @@ class Action:
 
     def perform(self, engine) -> None:
         raise NotImplementedError()
-        
+
+class ItemAction(Action):
+    def __init__(self, entity: Actor, item: Item, target_xy: Optional[Tuple[int, int]] = None):
+        super().__init__(entity)
+        self.item  = item
+        if not target_xy:
+            target_xy = entity.x, entity.y
+        self.target_xy = target_xy
+    
+    @property
+    def target_actor(self) -> Optional[Actor]:
+        return self.engine.game_map.get_actor_at_location(*self.target_xy)
+    
+    def perform(self) -> None:
+        self.item.consumable.activate(self)
+
 class WaitAction(Action):
     def perform(self) -> None:
         pass
@@ -55,7 +71,7 @@ class AttackAction(ActionWithDirection):
     def perform(self) -> None:
         target = self.target_actor
         if not target:
-            return # Nothing to attack
+            raise exceptions.Impossible("Nothing to attack.")
         
         damage = self.entity.fighter.attack - target.fighter.defence
         attack_desc = f"{self.entity.name.capitalize()} attacks {target.name}"
@@ -74,11 +90,11 @@ class MovementAction(ActionWithDirection):
         dest_x, dest_y = self.dest_xy
 
         if not self.engine.game_map.in_bounds(dest_x, dest_y):
-            return # Destination out of bounds
+            raise exceptions.Impossible("The way is blocked.")
         if not self.engine.game_map.tiles["walkable"][dest_x, dest_y]:
-            return # Destination blocked by tile
+            raise exceptions.Impossible("The way is blocked.")
         if self.engine.game_map.get_blocking_entity(dest_x, dest_y):
-            return # Destination blocked by entity
+            raise exceptions.Impossible("The way is blocked.")
 
         self.entity.move(self.dx, self.dy)
 
