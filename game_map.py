@@ -5,7 +5,7 @@ import numpy as np
 from numpy.lib.shape_base import tile
 from tcod.console import Console
 
-from entity import Actor
+from entity import Actor, Item
 import tile_types
 
 if TYPE_CHECKING:
@@ -27,12 +27,13 @@ class GameMap:
         
     @property
     def actors(self) -> Iterator[Actor]:
-        """Iterate over this maps living actors."""
-        yield from (
-            entity
-            for entity in self.entities
-            if isinstance(entity, Actor) and entity.is_alive
-        )
+        """Iterate over this map's living actors"""
+        yield from (entity for entity in self.entities if isinstance(entity, Actor) and entity.is_alive)
+
+    @property
+    def items(self) -> Iterator[Item]:
+        """Iterate over this map's items"""
+        yield from (entity for entity in self.entities if isinstance(entity, Item))
 
     def get_blocking_entity(self, loc_x: int, loc_y: int) -> Optional[Entity]:
         for en in self.entities:
