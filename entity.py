@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import copy
 
-from typing import Optional, Tuple, Type, TypeVar, TYPE_CHECKING
+from typing import Optional, Tuple, Type, TypeVar, TYPE_CHECKING, Union
 from render_order import RenderOrder
 
 if TYPE_CHECKING:
@@ -18,7 +18,7 @@ class Entity:
     """
     Represents players, items, enemies etc on the screen
     """
-    parent: GameMap
+    parent: Union[GameMap, Inventory]
 
     def __init__(self, parent: Optional[GameMap] = None, x: int = 0, y: int = 0, char: str = "?",
         color: Tuple[int, int, int] = (255, 255, 255), name: str = "<Unnamed>", blocks_movement: bool = False,

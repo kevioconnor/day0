@@ -7,7 +7,8 @@ from tcod.console import Console
 
 import tcod
 
-from actions import Action, CollideAction, EscapeAction, PickupAction, WaitAction
+import actions
+from actions import Action, CollideAction, PickupAction, WaitAction
 import color
 import exceptions
 
@@ -139,7 +140,7 @@ class InventoryEventHandler(AskUserEventHandler):
                 item_key = chr(ord("a") + i)
                 console.print(x + 1, y + i + 1, f"({item_key}) {item.name}")
         else:
-            console.print(x + 1, y + 1, "(Empty)")
+            console.print(x + 1, y + 1, "(Inventory empty)")
         
     def ev_keydown(self, event: tcod.event.KeyDown) -> Optional[Action]:
         player = self.engine.player
@@ -159,7 +160,16 @@ class InventoryEventHandler(AskUserEventHandler):
         """Called when the user selects a valid item."""
         raise NotImplementedError()
 
-    
+class InventoryActiveHandler(InventoryEventHandler):
+    TITLE = "Select an item to use"
+    def on_item_selected(self, item: Item) -> Optional[Action]:
+        return item.consumable.get_action(self.engine.player)
+
+class InventoryDropHandler(InventoryEventHandler):
+    TITLE = "Select an item to drop"
+    def on_item_selected(self, item: Item) -> Optional[Action]:
+        return actions.DropAction(self.engine.player, item)
+
 class MainGameEventHandler(EventHandler):
     def ev_keydown(self, event: "tcod.event.KeyDown") -> Optional[Action]:
         action: Optional[Action] = None
@@ -174,11 +184,16 @@ class MainGameEventHandler(EventHandler):
             action = WaitAction(player)
 
         elif key == tcod.event.K_ESCAPE:
-            action = EscapeAction(player)
+            raise SystemExit()
         elif key == tcod.event.K_v:
             self.engine.event_handler = HistoryViewer(self.engine)
         elif key == tcod.event.K_g:
             action = PickupAction(player)
+        elif key == tcod.event.K_i:
+            self.engine.event_handler = InventoryActiveHandler(self.engine)
+        elif key == tcod.event.K_d:
+            self.engine.event_handler = InventoryDropHandler(self.engine)
+        
 
         return action
 

@@ -64,10 +64,6 @@ class DropAction(ItemAction):
     def perform(self) ->None:
         self.entity.inventory.drop(self.item)
 
-class EscapeAction(Action):
-    def perform(self, engine) -> None:
-        raise SystemExit()
-
 class ActionWithDirection(Action):
     def __init__(self, entity: Actor, dx: int, dy: int) -> None:
         super().__init__(entity)
