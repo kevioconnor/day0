@@ -1,10 +1,13 @@
 from __future__ import annotations
-from typing import List, Tuple, TYPE_CHECKING
+from entity import Entity
+
+import random
+from typing import List, Optional, Tuple, TYPE_CHECKING
 
 import numpy as np
 import tcod
 
-from actions import Action, AttackAction, MovementAction, WaitAction
+from actions import Action, CollideAction, AttackAction, MovementAction, WaitAction
 
 if TYPE_CHECKING:
     from entity import Actor
@@ -53,3 +56,27 @@ class HostileEnemy(BaseAI):
             ).perform()
 
         return WaitAction(self.entity).perform()
+    
+class DazedEnemy(BaseAI):
+    def __init__(self, entity: Actor, previous_ai: Optional[BaseAI], turns_left: int) -> None:
+        super().__init__(entity)
+        self.previous_ai = previous_ai
+        self.turns_left = turns_left
+
+    def perform(self) -> None:
+        if self.turns_left <= 0:
+            self.engine.message_log.add_message(f"The {self.entity.name} is no longer dazed.")
+            self.entity.ai = self.previous_ai
+        else:
+            dx, dy = random.choice([
+                    (-1, -1),
+                    (0, -1),
+                    (1, -1),
+                    (-1, 0),
+                    (1, 0),
+                    (-1, 1),
+                    (0, 1),
+                    (1, 1),
+            ])
+            self.turns_left -= 1
+            return CollideAction(self.entity, dx, dy,).perform()

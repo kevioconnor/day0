@@ -102,7 +102,7 @@ class AttackAction(ActionWithDirection):
         else:
             attack_color = color.enemy_atk
         if damage > 0:
-            self.engine.message_log.add_message(f"{attack_desc} for {damage} HP!", attack_color)
+            self.engine.message_log.add_message(f"{attack_desc} for {damage} HP.", attack_color)
             target.fighter.hp -= damage
         else:
             self.engine.message_log.add_message(f"{attack_desc} but nothing happens.", attack_color)

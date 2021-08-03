@@ -3,9 +3,11 @@ from typing import Optional, TYPE_CHECKING
 
 import actions
 import color
+import components.ai
 import components.inventory
 from components.base_component import BaseComponent
 from exceptions import Impossible
+from input_handlers import AreaRangedAttackHandler, SingleRangedAttackHandler
 
 if TYPE_CHECKING:
     from entity import Actor, Item
@@ -18,6 +20,38 @@ class Consumable(BaseComponent):
     
     def activate(self, action: actions.ItemAction) -> None:
         raise NotImplementedError
+
+    def consume(self) -> None:
+        entity = self.parent
+        inventory = entity.parent
+        if isinstance(inventory, components.inventory.Inventory):
+            inventory.items.remove(entity)
+
+class DazedConsumable(Consumable):
+    def __init__(self, number_of_turns: int):
+        self.number_of_turns = number_of_turns
+
+    def get_action(self, consumer: Actor) -> Optional[actions.Action]:
+        self.engine.message_log.add_message("Select a target location.", color.needs_target)
+        self.engine.event_handler = SingleRangedAttackHandler(
+            self.engine, callback=lambda xy: actions.ItemAction(consumer, self.parent, xy),
+        )
+        return None
+
+    def activate(self, action: actions.ItemAction) -> None:
+        consumer = action.entity
+        target = action.target_actor
+
+        if not self.engine.game_map.visible[action.target_xy]:
+            raise Impossible("You can't see that area.")
+        if not target:
+            raise Impossible("You must select an enemy to target.")
+        if target is consumer:
+            raise Impossible("You can't daze yourself!")
+
+        self.engine.message_log.add_message(f"The {target.name} has been dazed.", color.status_effect_applied)
+        target.ai = components.ai.DazedEnemy(entity=target, previous_ai=target.ai, turns_left=self.number_of_turns,)
+        self.consume()
 
 class HealingConsumable(Consumable):
     def __init__(self, amount: int) -> None:
@@ -34,9 +68,54 @@ class HealingConsumable(Consumable):
             self.consume()
         else:
             raise Impossible(f"Your health is already full.")
+
+class RangedDamageConsumable(Consumable):
+    def __init__(self, damage: int, max_range: int) -> None:
+        self.damage = damage
+        self.max_range = max_range
     
-    def consume(self) -> None:
-        entity = self.parent
-        inventory = entity.parent
-        if isinstance(inventory, components.inventory.Inventory):
-            inventory.items.remove(entity)
+    def activate(self, action: actions.ItemAction) -> None:
+        consumer = action.entity
+        target = None
+        closest = self.max_range + 1.0
+
+        for actor in self.engine.game_map.actors:
+            if actor is not consumer and self.parent.gamemap.visible[actor.x, actor.y]:
+                distance = consumer.distance(actor.x, actor.y)
+                if distance < closest:
+                    target = actor
+                    closest = distance
+        
+        if target:
+            self.engine.message_log.add_message(f"The rock hits the {target.name} for {self.damage} HP.")
+            target.fighter.take_damage(self.damage)
+            self.consume()
+
+        else:
+            raise Impossible("No enemy in range.")
+
+class AreaDamageConsumable(Consumable):
+    def __init__(self, damage: int, radius: int):
+        self.damage = damage
+        self.radius = radius
+
+    def get_action(self, consumer: Actor) -> Optional[actions.Action]:
+        self.engine.message_log.add_message("Select a target location.", color.needs_target)
+        self.engine.event_handler = AreaRangedAttackHandler(
+            self.engine, self.radius, callback=lambda xy: actions.ItemAction(consumer, self.parent, xy),
+        )
+        return None
+    
+    def activate(self, action: actions.ItemAction) -> None:
+        target_xy = action.target_xy
+        if not self.engine.game_map.visible[action.target_xy]:
+            raise Impossible("You can't see that area.")
+        targets_hit = False
+        for actor in self.engine.game_map.actors:
+            if actor.distance(*target_xy) <= self.radius:
+                self.engine.message_log.add_message(f"The {actor.name} is hit by dirt, losing {self.damage} HP.")
+                actor.fighter.take_damage(self.damage)
+                targets_hit = True
+        if not targets_hit:
+            raise Impossible("There are no targets in the radius.")
+        self.consume()
