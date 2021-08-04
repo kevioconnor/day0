@@ -102,7 +102,7 @@ class EventHandler(BaseEventHandler):
         self.engine.update_fov()
         return True
         
-    def ev_mousemotion(self, event: tcod.event.MouseMotion) -> Optional[T]:
+    def ev_mousemotion(self, event: tcod.event.MouseMotion) -> None:
         if self.engine.game_map.in_bounds(event.tile.x, event.tile.y):
             self.engine.mouse_location = event.tile.x, event.tile.y
     
