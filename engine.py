@@ -1,5 +1,5 @@
 from __future__ import annotations
-
+import lzma, pickle
 from typing import TYPE_CHECKING
 from numpy import e
 
@@ -44,3 +44,8 @@ class Engine:
         render_bar(console=console, current_val=self.player.fighter.hp,
         max_val=self.player.fighter.max_hp, total_width=20)
         render_name_at_location(console=console, x=21, y=44, engine=self)
+
+    def save_as(self, filename: str) -> None:
+        save_data = lzma.compress(pickle.dumps(self))
+        with open(filename, "wb") as f:
+            f.write(save_data)

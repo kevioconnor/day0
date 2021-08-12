@@ -5,6 +5,11 @@ import color
 
 import exceptions, input_handlers, setup_game
 
+def save_game(handler: input_handlers.BaseEventHandler, filename: str) -> None:
+    if isinstance(handler, input_handlers.EventHandler):
+        handler.engine.save_as(filename)
+        print("Game saved.")
+
 def main()-> None:
     screen_width = 80
     screen_height = 50
@@ -38,10 +43,12 @@ def main()-> None:
         except exceptions.QuitWithoutSaving:
             raise
         except SystemExit:
+            save_game(handler, "savegame.sav")
             raise
         except BaseException:
+            save_game(handler, "savegame.sav")
             raise
-            
+
 
 if __name__ == "__main__":
     main()
