@@ -6,7 +6,7 @@ from numpy import log
 from tcod.console import Console
 
 import tcod
-
+import os
 import actions
 from actions import Action, CollideAction, PickupAction, WaitAction
 import color
@@ -318,9 +318,14 @@ class MainGameEventHandler(EventHandler):
         return action
 
 class GameOverEventHandler(EventHandler):
+    def on_quit(self) -> None:
+        if os.path.exists("savegame.sav"):
+            os.remove("savegame.sav")
+        raise exceptions.QuitWithoutSaving()
+
     def ev_keydown(self, event: tcod.event.KeyDown) -> None:
         if event.sym == tcod.event.K_ESCAPE:
-            raise SystemExit()
+            self.on_quit()
 
 CURSOR_Y_KEYS = {
     tcod.event.K_UP: -1,
