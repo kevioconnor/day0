@@ -20,6 +20,7 @@ class GameMap:
         self.tiles = np.full((width, height), fill_value=tile_types.wall, order="F")
         self.visible = np.full((width, height), fill_value=False, order="F")
         self.explored = np.full((width, height), fill_value=False, order="F") 
+        self.downstairs_location = (0, 0)
 
     @property
     def gamemap(self) -> GameMap:
@@ -64,3 +65,46 @@ class GameMap:
         for en in entities_sorted:
             if self.visible[en.x, en.y]:
                 console.print(en.x, en.y, en.char, fg=en.color)
+
+class GameWorld:
+
+    def __init__(
+        self,
+        *,
+        engine: Engine,
+        map_width: int,
+        map_height: int,
+        max_rooms: int,
+        room_min_size: int,
+        room_max_size: int,
+        max_monsters_per_room: int,
+        max_items_per_room: int,
+        current_floor: int = 0
+    ):
+        self.engine = engine
+        self.map_width = map_width
+        self.map_height = map_height
+
+        self.max_rooms = max_rooms
+        self.room_min_size = room_min_size
+        self.room_max_size = room_max_size
+
+        self.max_monsters_per_room = max_monsters_per_room
+        self.max_items_per_room = max_items_per_room
+
+        self.current_floor = current_floor
+
+    def gen_floor(self) -> None:
+        from procgen import gen_dungeon
+        self.current_floor += 1
+
+        self.engine.game_map = gen_dungeon(
+            max_rooms=self.max_rooms,
+            room_min_size=self.room_min_size,
+            room_max_size=self.room_max_size,
+            map_width=self.map_width,
+            map_height=self.map_height,
+            max_monsters_per_room=self.max_monsters_per_room,
+            max_items_per_room=self.max_items_per_room,
+            engine=self.engine,
+        )

@@ -17,8 +17,8 @@ def new_game() -> Engine:
     room_min_size = 6
     max_no_rooms = 30
 
-    max_monster_per_room = 2
-    max_item_per_room = 3
+    max_monsters_per_room = 2
+    max_items_per_room = 3
 
     player = copy.deepcopy(entity_factories.player)
     engine = Engine(player=player)
@@ -29,8 +29,8 @@ def new_game() -> Engine:
         room_max_size=room_max_size,
         map_width=map_width,
         map_height=map_height,
-        max_monster_per_room=max_monster_per_room,
-        max_item_per_room=max_item_per_room,
+        max_monsters_per_room=max_monsters_per_room,
+        max_items_per_room=max_items_per_room,
         engine=engine
     )
     engine.update_fov()

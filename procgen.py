@@ -84,11 +84,12 @@ def tunnel_between(
 
 def gen_dungeon(
     max_no_rooms: int, room_min_size: int, room_max_size: int, map_width: int, map_height: int,
-    max_monster_per_room: int, max_item_per_room: int, engine: Engine
+    max_monsters_per_room: int, max_items_per_room: int, engine: Engine
 ) -> GameMap:
     player = engine.player
     dungeon = GameMap(engine, map_width, map_height, entities=[player])
     rooms: List[RectRoom] = []
+    center_of_room = (0, 0)
 
     for r in range(max_no_rooms):
         room_width = random.randint(room_min_size, room_max_size)
@@ -109,8 +110,12 @@ def gen_dungeon(
         else:
             for x, y in tunnel_between(rooms[-1].center, new_room.center):
                 dungeon.tiles[x, y] = tile_types.floor
+                
+            center_of_room = new_room.center
 
-        place_entities(new_room, dungeon, max_monster_per_room, max_item_per_room)
+        place_entities(new_room, dungeon, max_monsters_per_room, max_items_per_room) 
+        dungeon.tiles[center_of_room] = tile_types.downstairs
+        dungeon.downstairs_location = center_of_room
 
         rooms.append(new_room)
 
