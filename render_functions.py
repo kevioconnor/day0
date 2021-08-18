@@ -2,7 +2,7 @@ from __future__ import annotations
 from os import name
 from entity import Entity
 import typing
-from typing import TYPE_CHECKING
+from typing import Tuple, TYPE_CHECKING
 import color
 
 if TYPE_CHECKING:
@@ -25,6 +25,10 @@ def render_bar(console: Console, current_val: int, max_val: int, total_width: in
         console.draw_rect(x=0, y=45, width=bar_width, height=1, ch=1, bg=color.bar_filled)
 
     console.print(x=1, y=45, string=f"HP: {current_val}/{max_val}", fg=color.bar_text)
+
+def render_level(console: Console, dungeon_level: int, location: Tuple[int, int]) -> None:
+    x, y = location
+    console.print(x=x, y=y, string=f"Dungeon level: {dungeon_level}")
 
 def render_name_at_location(console: Console, x: int, y: int, engine: Engine) -> None:
     mouse_x, mouse_y = engine.mouse_location

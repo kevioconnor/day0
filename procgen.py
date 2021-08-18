@@ -83,7 +83,7 @@ def tunnel_between(
         yield x, y
 
 def gen_dungeon(
-    max_no_rooms: int, room_min_size: int, room_max_size: int, map_width: int, map_height: int,
+    max_rooms: int, room_min_size: int, room_max_size: int, map_width: int, map_height: int,
     max_monsters_per_room: int, max_items_per_room: int, engine: Engine
 ) -> GameMap:
     player = engine.player
@@ -91,7 +91,7 @@ def gen_dungeon(
     rooms: List[RectRoom] = []
     center_of_room = (0, 0)
 
-    for r in range(max_no_rooms):
+    for r in range(max_rooms):
         room_width = random.randint(room_min_size, room_max_size)
         room_height = random.randint(room_min_size, room_max_size)
 

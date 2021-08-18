@@ -60,6 +60,14 @@ class WaitAction(Action):
     def perform(self) -> None:
         pass
 
+class StairsAction(Action):
+    def perform(self) -> None:
+        if (self.entity.x, self.entity.y) == self.engine.game_map.downstairs_location:
+            self.engine.game_world.gen_floor()
+            self.engine.message_log.add_message("You go down the steps...", color.descend)
+        else:
+            raise exceptions.Impossible("There are no steps to use.")
+
 class DropAction(ItemAction):
     def perform(self) ->None:
         self.entity.inventory.drop(self.item)

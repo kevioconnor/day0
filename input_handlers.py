@@ -8,7 +8,7 @@ from tcod.console import Console
 import tcod
 import os
 import actions
-from actions import Action, CollideAction, PickupAction, WaitAction
+from actions import Action, CollideAction, PickupAction, StairsAction, WaitAction
 import color
 import exceptions
 
@@ -304,7 +304,7 @@ class MainGameEventHandler(EventHandler):
 
         elif key == tcod.event.K_ESCAPE:
             raise SystemExit()
-        elif key == tcod.event.K_v:
+        elif key == tcod.event.K_p:
             return HistoryViewer(self.engine)
         elif key == tcod.event.K_g:
             action = PickupAction(player)
@@ -314,7 +314,8 @@ class MainGameEventHandler(EventHandler):
             return InventoryDropHandler(self.engine)
         elif key == tcod.event.K_SLASH:
             return LookHandler(self.engine)
-
+        elif key == tcod.event.K_v:
+            action = StairsAction(player)
         return action
 
 class GameOverEventHandler(EventHandler):

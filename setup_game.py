@@ -5,7 +5,7 @@ import tcod
 
 from engine import Engine
 import color, entity_factories, input_handlers
-from procgen import gen_dungeon
+from game_map import GameWorld
 
 background_image = tcod.image.load("menu_background.png")[:, :, :3]
 
@@ -15,7 +15,7 @@ def new_game() -> Engine:
 
     room_max_size = 10
     room_min_size = 6
-    max_no_rooms = 30
+    max_rooms = 30
 
     max_monsters_per_room = 2
     max_items_per_room = 3
@@ -23,16 +23,18 @@ def new_game() -> Engine:
     player = copy.deepcopy(entity_factories.player)
     engine = Engine(player=player)
 
-    engine.game_map = gen_dungeon(
-        max_no_rooms=max_no_rooms,
+    engine.game_world = GameWorld(
+        engine=engine,
+        max_rooms=max_rooms,
         room_min_size=room_min_size,
         room_max_size=room_max_size,
         map_width=map_width,
         map_height=map_height,
         max_monsters_per_room=max_monsters_per_room,
         max_items_per_room=max_items_per_room,
-        engine=engine
     )
+
+    engine.game_world.gen_floor()
     engine.update_fov()
     engine.message_log.add_message(
         "You are currently in Caveman Cave.", color.white
