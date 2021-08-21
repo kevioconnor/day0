@@ -28,7 +28,7 @@ def render_bar(console: Console, current_val: int, max_val: int, total_width: in
 
 def render_level(console: Console, dungeon_level: int, location: Tuple[int, int]) -> None:
     x, y = location
-    console.print(x=x, y=y, string=f"Dungeon level: {dungeon_level}")
+    console.print(x=x, y=y, string=f"Level {dungeon_level}")
 
 def render_name_at_location(console: Console, x: int, y: int, engine: Engine) -> None:
     mouse_x, mouse_y = engine.mouse_location
